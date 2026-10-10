@@ -9,6 +9,12 @@ import { getTransporter } from '../utils/mailer.js';
 const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// A Drive "view" link serves an HTML page; rewrite it to the direct file download.
+const toDirectDownload = (url) => {
+  const id = url.match(/drive\.google\.com\/file\/d\/([^/]+)/)?.[1];
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : url;
+};
+
 router.post('/send', async (req, res) => {
   const hrName = req.body.hrName?.trim();
   const companyName = req.body.companyName?.trim();
@@ -32,10 +38,14 @@ router.post('/send', async (req, res) => {
   const attachments = [];
   const resumePath = process.env.RESUME_PATH;
   if (resumePath) {
-    if (!fs.existsSync(resumePath)) {
+    const isUrl = /^https?:\/\//.test(resumePath);
+    if (!isUrl && !fs.existsSync(resumePath)) {
       return res.status(500).json({ error: `Resume not found at RESUME_PATH: ${resumePath}` });
     }
-    attachments.push({ filename: path.basename(resumePath), path: resumePath });
+    attachments.push({
+      filename: process.env.RESUME_FILENAME || (isUrl ? 'Resume.pdf' : path.basename(resumePath)),
+      path: isUrl ? toDirectDownload(resumePath) : resumePath,
+    });
   }
 
   const log = { hrName, companyName, email, templateName: template.name, subject };

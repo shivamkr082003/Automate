@@ -7,7 +7,9 @@ import emailRoutes from './routes/email.js';
 import { seedTemplates } from './seed.js';
 
 const app = express();
-app.use(cors());
+// CLIENT_URL: comma-separated allowed origins (e.g. the Vercel URL). Unset = allow all.
+const allowedOrigins = process.env.CLIENT_URL?.split(',').map((o) => o.trim().replace(/\/$/, ''));
+app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 app.use(express.json());
 
 app.get('/api/config', (req, res) => {
@@ -17,6 +19,7 @@ app.get('/api/config', (req, res) => {
     resumeAttached: Boolean(process.env.RESUME_PATH),
   });
 });
+app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/templates', templateRoutes);
 app.use('/api', emailRoutes);
 

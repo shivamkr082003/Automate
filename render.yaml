@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: automate-email-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: SENDER_NAME
+        sync: false
+      - key: RESUME_PATH
+        sync: false
+      - key: RESUME_FILENAME
+        value: Resume.pdf
+      - key: CLIENT_URL
+        sync: false

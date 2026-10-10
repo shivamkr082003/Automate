@@ -1,5 +1,8 @@
+// Empty in dev (Vite proxies /api); set VITE_API_URL to the Render URL in production.
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 async function request(url, options = {}) {
-  const res = await fetch(url, {
+  const res = await fetch(API_BASE + url, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
